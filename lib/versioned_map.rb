@@ -1,73 +1,71 @@
 require "mongoid"
 require "mongoid/versioning"
 require "securerandom"
+require "versioned_map/store"
 
 class VersionedMap
-  include Mongoid::Document
-  include Mongoid::Timestamps
-  include Mongoid::Versioning
+  attr_accessor :store
 
-  field :token, type: String
+  delegate :token, :id, to: :store
 
-  before_create    :set_token!
+  def initialize(store = nil)
+    self.store = store || Store.new
+  end
+  
+  def self.find(token)
+    VersionedMap.new(Store.get(token))
+  end
 
   def set(key, value = "")
     return false if ![String, Symbol].include?(key.class)
     return false if %w|token _id created_at updated_at|.include?(key.to_s)
 
-    self[key] = value
+    store[key] = value
   end
 
   def get(key)
-    return false if ![String, Symbol].include?(key.class)
-    return false if %w|token _id created_at updated_at|.include?(key.to_s)
+    return false if !validate_key(key)
 
-    self[key]
+    store[key]
   end
 
   def remove(key)
-    self.unset(key)
+    return false if !validate_key(key)
+
+    store[key] = nil
   end
 
-  def store!
-    if self.new_record?
-      return self.save && self
+  def validate_key(key)
+    [String, Symbol].include?(key.class) &&
+    !%w|versions version token _id created_at updated_at|.include?(key.to_s)
+  end
+
+  def save
+    if store.new_record?
+      return store.save && token
     end
 
-    self.versionless do |doc|
-      new = doc.clone
-      new.set_token!
-      new.save && new
-    end
+    self.store = store.versionless(&:clone)
+    store.version  = 1
+    store.versions = []
+    store.save && token
   end
 
   def update
-    self.revise!
+    store.revise!
   end
 
-  def current_version
-    ver = version - 1
-    ver== 0 ? nil : ver
+  def version
+    ver = store.version - 1
+    ver == 0 ? nil : ver
   end
 
   def get_version(ver = 0)
-    ver = ver.nil? ? 0 : ver
-    self.versions[ver]
-  end
-
-  def latest
-    self.versions.last
+    ver = !ver ? 0 : ver
+    VersionedMap.new(store.versions[ver])
   end
 
   def max_version
-    self.latest.current_version
-  end
-
-  def set_token!
-    self.token = SecureRandom.hex(8)
-  end
-
-  def self.get(token)
-    self.find_by(token: token)
+    store.versions.size - 1
   end
 end
