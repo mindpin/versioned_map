@@ -66,6 +66,7 @@ class VersionedMap
   end
 
   def max_version
-    store.versions.size - 1
+    ver = store.versions.size - 1
+    ver < 0 ? 0 : ver
   end
 end
