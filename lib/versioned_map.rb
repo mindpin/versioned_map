@@ -62,6 +62,7 @@ class VersionedMap
 
   def get_version(ver = 0)
     ver = !ver ? 0 : ver
+    return if ver > max_version
     VersionedMap.new(store.versions[ver])
   end
 

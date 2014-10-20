@@ -3,6 +3,7 @@ class VersionedMap
     include Mongoid::Document
     include Mongoid::Timestamps
     include Mongoid::Versioning
+    include Mongoid::Attributes::Dynamic
 
     field :token, type: String
 

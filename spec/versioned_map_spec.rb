@@ -26,14 +26,24 @@ describe VersionedMap do
     expect(map.max_version).to eq 1
     expect(map.get_version(1).version).to eq 1
 
-    token2 = map.save
-    expect(map.token).to eq token2
-    expect(map.version).to eq nil
-
     map.set("foo", "bar")
     expect(map.get("foo")).to eq "bar"
 
+    token2 = map.save
+    expect(map.get("foo")).to eq "bar"
+    expect(map.token).to eq token2
+    expect(map.version).to eq nil
+
+    map.set("foo", "bag")
+    map.update
+    expect(map.get("foo")).to eq "bag"
+    expect(map.get_version(0).get("foo")).to eq "bar"
+
+    map.set("foo", "bar")
     map.remove("foo")
+    map.update
+    expect(map.get_version(0).get("foo")).to eq "bar"
+    expect(map.get_version(1).get("foo")).to eq "bag"
     expect(map.get("foo")).to eq nil
 
     expect(VersionedMap.find(token2).store).to eq map.store
