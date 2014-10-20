@@ -1,5 +1,5 @@
 # VersionedMap
-Multi-version document store. Fundamental tool to build varials anonymous online services.
+Multi-version document store. Fundamental tool to build various anonymous online services.
 
 ## Installation
 
