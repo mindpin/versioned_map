@@ -17,8 +17,7 @@ class VersionedMap
   end
 
   def set(key, value = "")
-    return false if ![String, Symbol].include?(key.class)
-    return false if %w|token _id created_at updated_at|.include?(key.to_s)
+    return false if !validate_key(key)
 
     store[key] = value
   end
