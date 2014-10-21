@@ -42,9 +42,9 @@ describe VersionedMap do
     map.set("foo", "bar")
     map.remove("foo")
     map.update
+    expect(map.get("foo")).to eq nil
     expect(map.get_version(0).get("foo")).to eq "bar"
     expect(map.get_version(1).get("foo")).to eq "bag"
-    expect(map.get("foo")).to eq nil
 
     expect(VersionedMap.find(token2).store).to eq map.store
   }

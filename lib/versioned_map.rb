@@ -1,5 +1,4 @@
 require "mongoid"
-require "mongoid/versioning"
 require "securerandom"
 require "versioned_map/store"
 
@@ -36,7 +35,7 @@ class VersionedMap
 
   def validate_key(key)
     [String, Symbol].include?(key.class) &&
-    !%w|versions version token _id created_at updated_at|.include?(key.to_s)
+    !%w|versions version token _id created_at updated_at origin|.include?(key.to_s)
   end
 
   def save
@@ -44,29 +43,38 @@ class VersionedMap
       return store.save && token
     end
 
-    self.store = store.versionless(&:clone)
-    store.version  = 1
+    self.store = store.clone
+    store.version  = 0
     store.versions = []
+    store.origin   = nil
     store.save && token
   end
 
   def update
-    store.revise!
+    self.store = store.revise!
   end
 
   def version
-    ver = store.version - 1
-    ver == 0 ? nil : ver
+    store.version == 0 ? nil : store.version
   end
 
   def get_version(ver = 0)
     ver = !ver ? 0 : ver
+    return if ver < 0
     return if ver > max_version
-    VersionedMap.new(store.versions[ver])
+
+    parent = store.origin ? store.origin : store
+
+    if ver == 0
+      self.store = parent.reload
+      return self
+    end
+
+    self.store = parent.reload.versions.find_by(version: ver)
+    self
   end
 
   def max_version
-    ver = store.versions.size - 1
-    ver < 0 ? 0 : ver
+    store.versions.size + 1
   end
 end
