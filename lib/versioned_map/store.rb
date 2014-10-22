@@ -21,8 +21,19 @@ class VersionedMap
 
     before_create :set_token!
 
+    delegate :token_length, to: :class
+
+    def self.token_length=(length)
+      @token_length = length
+    end
+
+    def self.token_length
+      @token_length || 8
+    end
+
     def set_token!
-      self.token = SecureRandom.hex(8) if !self.origin
+      length = (token_length / 2.0).ceil
+      self.token = SecureRandom.hex(length) if !self.origin
     end
 
     def revise!
