@@ -32,8 +32,7 @@ class VersionedMap
     end
 
     def set_token!
-      length = (token_length / 2.0).ceil
-      self.token = SecureRandom.hex(length) if !self.origin
+      self.token = randstr(token_length) if !self.origin
     end
 
     def revise!
@@ -59,6 +58,16 @@ class VersionedMap
 
     def self.get(token)
       self.find_by(token: token)
+    end
+
+    def randstr(length=8)
+      base = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+      size = base.size
+      re = '' << base[rand(size-10)]
+      (length - 1).times {
+        re << base[rand(size)]
+      }
+      re
     end
   end
 

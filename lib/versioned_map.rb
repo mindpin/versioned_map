@@ -1,5 +1,4 @@
 require "mongoid"
-require "securerandom"
 require "versioned_map/store"
 
 class VersionedMap
