@@ -23,7 +23,7 @@ describe VersionedMap do
     map.update
     expect(map.version).to eq 2
     expect(map.token).to eq token1
-    expect(map.max_version).to eq 1
+    expect(map.max_version).to eq 2
     expect(map.get_version(1).version).to eq 1
 
     map.set("foo", "bar")

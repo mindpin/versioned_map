@@ -58,23 +58,29 @@ class VersionedMap
     store.version == 0 ? nil : store.version
   end
 
+  def origin_store
+    store.origin ? store.origin : store
+  end
+
   def get_version(ver = 0)
     ver = !ver ? 0 : ver
     return if ver < 0
     return if ver > max_version
 
-    parent = store.origin ? store.origin : store
-
     if ver == 0
-      self.store = parent.reload
+      self.store = origin_store.reload
       return self
     end
 
-    self.store = parent.reload.versions.find_by(version: ver)
+    self.store = origin_store.reload.versions.find_by(version: ver)
     self
   end
 
   def max_version
-    store.versions.size + 1
+    origin_store.reload.versions.size
+  end
+
+  def latest
+    get_version(max_version)
   end
 end
