@@ -42,8 +42,8 @@ class VersionedMap
 
       parent = origin ? origin : self
 
-      attrs.delete(:_id)
-      attrs.delete(:versions)
+      attrs.delete("_id")
+      attrs.delete("versions")
       attrs.merge!(version:    parent.versions.size + 1,
                    origin:     parent,
                    created_at: Time.now)

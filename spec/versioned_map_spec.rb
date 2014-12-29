@@ -46,6 +46,31 @@ describe VersionedMap do
     expect(map.get_version(0).get("foo")).to eq "bar"
     expect(map.get_version(1).get("foo")).to eq "bag"
 
-    expect(VersionedMap.find(token2).store).to eq map.store
+    expect(VersionedMap.find(token2).version).to eq 2
+  }
+
+  it {
+    map = VersionedMap.new
+    map.set("content", "1")
+    token = map.save
+
+    map = VersionedMap.find(token)
+    map.set("content", "2")
+    map.update
+
+    map = VersionedMap.find(token)
+    map.set(:content, "3")
+    map.update
+
+    map = VersionedMap.find(token)
+    map.set(:content, "4")
+    map.update
+
+    map = VersionedMap.find(token)
+    expect(map.store.versions.count).to eq(0)
+    origin = map.store.origin
+    expect(origin.versions[0].versions.count).to eq(0)
+    expect(origin.versions[1].versions.count).to eq(0)
+    expect(origin.versions[2].versions.count).to eq(0)
   }
 end

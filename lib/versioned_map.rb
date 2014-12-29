@@ -11,7 +11,9 @@ class VersionedMap
   end
   
   def self.find(token)
-    VersionedMap.new(Store.get(token))
+    vm = VersionedMap.new(Store.get(token))
+    vm.latest
+    vm
   end
 
   def set(key, value = "")
